@@ -48,7 +48,6 @@ class RakNetConan(ConanFile):
         tc.variables["RAKNET_ENABLE_DLL"] = self.options.shared
         tc.variables["RAKNET_ENABLE_STATIC"] = not self.options.shared
         tc.variables["RAKNET_GENERATE_INCLUDE_ONLY_DIR"] = True
-        # tc.cache_variables["CMAKE_POLICY_DEFAULT_CMP0077"] = "NEW"
         tc.generate()
         tc = CMakeDeps(self)
         tc.generate()
@@ -63,14 +62,6 @@ class RakNetConan(ConanFile):
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
         cmake = CMake(self)
         cmake.install()
-
-        # some files extensions and folders are not allowed. Please, read the FAQs to get informed.
-        # rmdir(self, os.path.join(self.package_folder, "lib", "pkgconfig"))
-        # rmdir(self, os.path.join(self.package_folder, "lib", "cmake"))
-        # rmdir(self, os.path.join(self.package_folder, "share"))
-        # rm(self, "*.la", os.path.join(self.package_folder, "lib"))
-        # rm(self, "*.pdb", os.path.join(self.package_folder, "lib"))
-        # rm(self, "*.pdb", os.path.join(self.package_folder, "bin"))
 
     def package_info(self):
         if self.options.shared:

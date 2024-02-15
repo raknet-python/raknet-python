@@ -1,0 +1,45 @@
+[build-system]
+requires = ["scikit-build-core"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "raknet"
+authors = [
+    { name = "Vincent Wu", email = "magicdroidx@gmail.com" }
+]
+description = "Python bindings for the RakNet networking library"
+readme = "README.md"
+requires-python = ">=3.9"
+keywords = ["python", "raknet", "network"]
+license = { file = "LICENSE" }
+classifiers = [
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+]
+dependencies = []
+dynamic = ["version"]
+
+[project.urls]
+#Changelog = "https://raknet.readthedocs.io/en/latest/changelog.html"
+Documentation = "https://raknet.readthedocs.io"
+Homepage = "https://github.com/wu-vincent/raknet-python"
+Issues = "https://github.com/wu-vincent/raknet-python/issues"
+
+[tool.scikit-build]
+cmake.args = ["-G Ninja", "--preset conan-release"]
+wheel.packages = ["python/src/raknet"]
+wheel.license-files = ["LICENSE"]
+install.components = ["python"]
+install.strip = false
+
+[tool.scikit-build.metadata.version]
+provider = "scikit_build_core.metadata.regex"
+input = "conanfile.py"
