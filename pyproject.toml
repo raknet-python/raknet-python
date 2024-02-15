@@ -35,7 +35,7 @@ Issues = "https://github.com/wu-vincent/raknet-python/issues"
 
 [tool.scikit-build]
 cmake.args = ["-G Ninja", "--preset conan-release"]
-wheel.packages = ["python/src/raknet"]
+wheel.packages = ["python/raknet"]
 wheel.license-files = ["LICENSE"]
 install.components = ["python"]
 install.strip = false
@@ -43,3 +43,22 @@ install.strip = false
 [tool.scikit-build.metadata.version]
 provider = "scikit_build_core.metadata.regex"
 input = "conanfile.py"
+
+[tool.cibuildwheel]
+skip = ["*-win32", "*-musllinux_x86_64", "*_i686"]
+test-requires = "pytest"
+test-command = "pytest {project}/tests"
+before-build = [
+    "pip install conan",
+    "conan profile detect --force",
+    "conan export raknet --version 4.081",
+    "conan install . --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja"
+]
+
+[tool.cibuildwheel.linux]
+before-build = [
+    "pip install conan ninja",
+    "conan profile detect --force",
+    "conan export raknet --version 4.081",
+    "conan install . --build=missing -c tools.cmake.cmaketoolchain:generator=Ninja"
+]

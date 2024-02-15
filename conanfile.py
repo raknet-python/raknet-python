@@ -21,7 +21,7 @@ class RakNetPythonRecipe(ConanFile):
     options = {}
     default_options = {"raknet/*:shared": False}
 
-    exports_sources = "CMakeLists.txt", "src/*", "include/*", "tests/*"
+    exports_sources = "CMakeLists.txt", "src/*", "include/*"
 
     def requirements(self):
         self.requires("raknet/4.081")

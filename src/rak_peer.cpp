@@ -9,11 +9,8 @@
 namespace py = pybind11;
 
 void def_rak_peer(pybind11::module &m) {
-    py::class_<RakNet::RakPeerInterface>(m, "RakPeer")
-        .def(py::init([]() {
-            return std::unique_ptr<RakNet::RakPeerInterface>(
-                RakNet::RakPeerInterface::GetInstance());
-        }))
+    py::class_<RakNet::RakPeer>(m, "RakPeer")
+        .def(py::init<>())
         .def(
             "start",
             [](RakNet::RakPeerInterface &a, const char *host, int port, int max_connections) {
