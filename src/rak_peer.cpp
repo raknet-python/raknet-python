@@ -1,8 +1,8 @@
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include "rak_peer.h"
 
+#include <raknet/RakNetTypes.h>
 #include <raknet/RakPeer.h>
 #include <raknet/RakPeerInterface.h>
 
