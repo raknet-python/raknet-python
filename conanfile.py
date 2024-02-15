@@ -3,8 +3,6 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 
 __version__ = "0.1.0"
 
-from conan.tools.env import VirtualBuildEnv
-
 
 class RakNetPythonRecipe(ConanFile):
     name = "raknet-python"
@@ -30,20 +28,14 @@ class RakNetPythonRecipe(ConanFile):
         self.requires("pybind11/2.11.1")
         # self.test_requires("gtest/1.14.0")
 
-    def build_requirements(self):
-        self.tool_requires("cmake/3.28.1")
-        self.tool_requires("ninja/1.11.1")
-
     def layout(self):
         cmake_layout(self)
 
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
-        tc = CMakeToolchain(self, generator="Ninja")
+        tc = CMakeToolchain(self)
         tc.generate()
-        build_env = VirtualBuildEnv(self)
-        build_env.generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
