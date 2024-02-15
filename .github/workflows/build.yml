@@ -1,4 +1,4 @@
-name: Windows
+name: Build
 
 on:
   push:
@@ -12,10 +12,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ windows-2019, windows-2022 ]
-        build_type: [ Debug, Release ]
+        os: [ windows-2019, windows-2022, ubuntu-20.04, ubuntu-22.04, macos-11, macos-12 ]
 
-    name: Build on ${{ matrix.os }} (${{ matrix.build_type }})
+    name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
     steps:
