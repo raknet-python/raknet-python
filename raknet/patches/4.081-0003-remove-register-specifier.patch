@@ -1,0 +1,26 @@
+diff --git a/Source/Rand.cpp b/Source/Rand.cpp
+index c3d8413..b01d1c6 100644
+--- a/Source/Rand.cpp
++++ b/Source/Rand.cpp
+@@ -142,8 +142,8 @@ void seedMT( unsigned int seed, unsigned int *state, unsigned int *&next, int &l
+ 	// so-- that's why the only change I made is to restrict to odd seeds.
+ 	//
+
+-	register unsigned int x = ( seed | 1U ) & 0xFFFFFFFFU, *s = state;
+-	register int j;
++	unsigned int x = ( seed | 1U ) & 0xFFFFFFFFU, *s = state;
++	int j;
+
+ 	for ( left = 0, *s++ = x, j = N; --j;
+ 		*s++ = ( x *= 69069U ) & 0xFFFFFFFFU )
+@@ -154,8 +154,8 @@ void seedMT( unsigned int seed, unsigned int *state, unsigned int *&next, int &l
+
+ unsigned int reloadMT( unsigned int *state, unsigned int *&next, int &left )
+ {
+-	register unsigned int * p0 = state, *p2 = state + 2, *pM = state + M, s0, s1;
+-	register int j;
++	unsigned int * p0 = state, *p2 = state + 2, *pM = state + M, s0, s1;
++	int j;
+
+ 	if ( left < -1 )
+ 		seedMT( 4357U );

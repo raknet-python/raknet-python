@@ -3,6 +3,8 @@ from conan.tools.cmake import CMakeToolchain, CMake, cmake_layout, CMakeDeps
 
 __version__ = "0.1.0"
 
+from conan.tools.env import VirtualBuildEnv
+
 
 class RakNetPythonRecipe(ConanFile):
     name = "raknet-python"
@@ -38,8 +40,10 @@ class RakNetPythonRecipe(ConanFile):
     def generate(self):
         deps = CMakeDeps(self)
         deps.generate()
-        tc = CMakeToolchain(self)
+        tc = CMakeToolchain(self, generator="Ninja")
         tc.generate()
+        build_env = VirtualBuildEnv(self)
+        build_env.generate(scope="build")
 
     def build(self):
         cmake = CMake(self)
