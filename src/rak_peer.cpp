@@ -13,7 +13,7 @@ void def_rak_peer(pybind11::module &m) {
         .def(py::init<>())
         .def(
             "start",
-            [](RakNet::RakPeerInterface &a, const char *host, int port, int max_connections) {
+            [](RakNet::RakPeer &a, const char *host, int port, int max_connections) {
                 auto local_addr = RakNet::SocketDescriptor(port, host);
                 a.Startup(max_connections, &local_addr, 1);
             },
