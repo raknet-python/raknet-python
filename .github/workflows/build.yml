@@ -1,22 +1,33 @@
 name: Build
 
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 jobs:
   build_wheels:
-    name: Build wheels on ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: Build wheel (${{ matrix.python }}-${{ matrix.machine.platform }})
+    runs-on: ${{ matrix.machine.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, windows-2019, macos-11]
+        machine:
+          - { os: 'windows-latest', platform: 'win_amd64' }
+          - { os: 'ubuntu-latest', platform: 'manylinux_x86_64' }
+          - { os: 'macos-latest', platform: 'macosx_x86_64' }
+        python: [ "cp39", "cp310", "cp311", "cp312" ]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-      - name: Build wheels
+      - name: Set up CMake and Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Build Wheels
         uses: pypa/cibuildwheel@v2.16.5
+        env:
+          CIBW_BUILD: ${{ matrix.python }}-${{ matrix.machine.platform }}
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          name: wheel-${{ matrix.python }}-${{ matrix.machine.platform }}
           path: ./wheelhouse/*.whl
