@@ -1,0 +1,31 @@
+diff --git a/Lib/DLL/CMakeLists.txt b/Lib/DLL/CMakeLists.txt
+index 771fdc6..41e3154 100644
+--- a/Lib/DLL/CMakeLists.txt
++++ b/Lib/DLL/CMakeLists.txt
+@@ -1,4 +1,4 @@
+-cmake_minimum_required(VERSION 2.6)
++cmake_minimum_required(VERSION 3.5)
+ project(RakNetDLL)
+
+ FILE(GLOB ALL_HEADER_SRCS ${RakNet_SOURCE_DIR}/Source/*.h)
+@@ -13,9 +13,20 @@ IF(WIN32 AND NOT UNIX)
+ 	SET( CMAKE_CXX_FLAGS "/D WIN32 /D _RAKNET_DLL /D _CRT_NONSTDC_NO_DEPRECATE /D _CRT_SECURE_NO_DEPRECATE /GS- /GR- ")
+ ENDIF(WIN32 AND NOT UNIX)
+
++IF(0)
+ IF(WIN32 AND NOT UNIX)
+ 	target_link_libraries (RakNetDLL ${RAKNET_LIBRARY_LIBS})
+ ELSE(WIN32 AND NOT UNIX)
+ 	target_link_libraries (RakNetDLL ${RAKNET_LIBRARY_LIBS})
+ 	INSTALL(TARGETS RakNetDLL DESTINATION ${RakNet_SOURCE_DIR}/Lib/DLL)
+ ENDIF(WIN32 AND NOT UNIX)
++ENDIF(0)
++
++target_link_libraries(RakNetDLL ${RAKNET_LIBRARY_LIBS})
++set_target_properties(RakNetDLL PROPERTIES OUTPUT_NAME raknet)
++include(GNUInstallDirs)
++install(TARGETS RakNetDLL
++		ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
++		LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
++		RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
++install(FILES ${ALL_HEADER_SRCS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/raknet)

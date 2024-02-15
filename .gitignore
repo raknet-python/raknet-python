@@ -1,11 +1,59 @@
-CMakeLists.txt.user
-CMakeCache.txt
-CMakeFiles
-CMakeScripts
-Testing
-Makefile
-cmake_install.cmake
-install_manifest.txt
-compile_commands.json
-CTestTestfile.cmake
-_deps
+# Conan specific
+**/test_package/build/
+**/test_package/build-*/
+**/test_package/test_output/
+conan.lock
+conanbuildinfo.cmake
+conanbuildinfo.txt
+conaninfo.txt
+graph_info.json
+build/
+
+# CMake
+CMakeUserPresets.json
+
+# IDEs
+.idea
+.vs
+.vscode
+
+# Byte-compiled / optimized / DLL files / Cache
+__pycache__/
+**/test_package/__pycache__/
+*.pyc
+*.py[cod]
+*$py.class
+tmp/
+.DS_Store
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
