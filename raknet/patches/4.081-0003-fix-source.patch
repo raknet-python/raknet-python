@@ -24,3 +24,16 @@ index c3d8413..b01d1c6 100644
 
  	if ( left < -1 )
  		seedMT( 4357U );
+diff --git a/Source/ReplicaManager3.cpp b/Source/ReplicaManager3.cpp
+index ba79c49..562ad65 100644
+--- a/Source/ReplicaManager3.cpp
++++ b/Source/ReplicaManager3.cpp
+@@ -138,7 +138,7 @@ void ReplicaManager3::AutoCreateConnectionList(
+ {
+ 	for (unsigned int index=0; index < participantListIn.Size(); index++)
+ 	{
+-		if (GetConnectionByGUID(participantListIn[index], worldId)==false)
++		if (!GetConnectionByGUID(participantListIn[index], worldId))
+ 		{
+ 			Connection_RM3 *connection = AllocConnection(rakPeerInterface->GetSystemAddressFromGuid(participantListIn[index]), participantListIn[index]);
+ 			if (connection)

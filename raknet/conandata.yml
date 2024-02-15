@@ -10,6 +10,6 @@ patches:
     - patch_file: "patches/4.081-0002-fix-shared-lib-cmake.patch"
       patch_description: "fix CMakeLists.txt for RakNetDLL"
       patch_type: "conan"
-    - patch_file: "patches/4.081-0003-remove-register-specifier.patch"
-      patch_description: "remove register storage class specifier"
+    - patch_file: "patches/4.081-0003-fix-source.patch"
+      patch_description: "fix compilation errors"
       patch_type: "conan"
