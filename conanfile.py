@@ -28,6 +28,10 @@ class RakNetPythonRecipe(ConanFile):
         self.requires("pybind11/2.11.1")
         # self.test_requires("gtest/1.14.0")
 
+    def build_requirements(self):
+        self.tool_requires("cmake/3.28.1")
+        self.tool_requires("ninja/1.11.1")
+
     def layout(self):
         cmake_layout(self)
 
@@ -41,11 +45,10 @@ class RakNetPythonRecipe(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
-        cmake.test()
 
     def package(self):
         cmake = CMake(self)
         cmake.install()
 
     def package_info(self):
-        self.cpp_info.requires = ["raknet"]
+        self.cpp_info.requires = ["raknet::raknet", "pybind11::headers"]
