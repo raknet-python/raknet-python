@@ -1,3 +1,16 @@
+diff --git a/Source/NatPunchthroughClient.cpp b/Source/NatPunchthroughClient.cpp
+index 82bb070..4a8b11f 100644
+--- a/Source/NatPunchthroughClient.cpp
++++ b/Source/NatPunchthroughClient.cpp
+@@ -792,7 +792,7 @@ void NatPunchthroughClient::SendTTL(const SystemAddress &sa)
+ 	rakPeerInterface->SendTTL(ipAddressString,sa.GetPort(), 2);
+ }
+
+-char *TestModeToString(NatPunchthroughClient::SendPing::TestMode tm)
++const char *TestModeToString(NatPunchthroughClient::SendPing::TestMode tm)
+ {
+ 	switch (tm)
+ 	{
 diff --git a/Source/Rand.cpp b/Source/Rand.cpp
 index c3d8413..b01d1c6 100644
 --- a/Source/Rand.cpp
