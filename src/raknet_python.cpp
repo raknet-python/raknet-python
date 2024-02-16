@@ -16,12 +16,24 @@ struct ConnectionAttemptError : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
+class RakNetPacket {
+public:
+    RakNetPacket(RakNet::RakPeer &peer, RakNet::Packet &packet) : peer_(peer), packet_(packet) {}
+    ~RakNetPacket() { peer_.DeallocatePacket(&packet_); }
+    [[nodiscard]] const char *data() const { return reinterpret_cast<const char *>(packet_.data); }
+    [[nodiscard]] size_t length() const { return packet_.length; }
+
+private:
+    RakNet::RakPeer &peer_;
+    RakNet::Packet &packet_;
+};
+
 PYBIND11_MODULE(raknet_python, m) {
     py::register_exception<StartupError>(m, "StartupError", PyExc_RuntimeError);
     py::register_exception<ConnectionAttemptError>(m, "ConnectionAttemptError", PyExc_RuntimeError);
 
-    py::class_<RakNet::Packet>(m, "Packet").def_property_readonly("data", [](const RakNet::Packet &self) {
-        return py::bytes(reinterpret_cast<char *>(self.data), self.length);
+    py::class_<RakNetPacket>(m, "Packet").def_property_readonly("data", [](const RakNetPacket &self) {
+        return py::bytes(self.data(), self.length());
     });
 
     py::class_<RakNet::RakPeer>(m, "RakPeer")
@@ -105,8 +117,14 @@ PYBIND11_MODULE(raknet_python, m) {
             py::arg("attempt_interval_ms") = 1000,
             py::arg("timeout") = 0)
 
-        // TODO: we need to call DeallocatePacket
-        .def("receive", &RakNet::RakPeer::Receive, py::return_value_policy::reference)
+        .def("receive",
+             [](RakNet::RakPeer &self) -> std::unique_ptr<RakNetPacket> {
+                 auto *packet = self.Receive();
+                 if (!packet) {
+                     return nullptr;
+                 }
+                 return std::make_unique<RakNetPacket>(self, *packet);
+             })
 
         .def_property("max_incoming_connections",
                       &RakNet::RakPeer::GetMaximumIncomingConnections,
