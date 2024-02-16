@@ -69,6 +69,7 @@ PYBIND11_MODULE(raknet_python, m) {
         .DEF_DEFAULT_MESSAGE_ID(ID_UNCONNECTED_PONG)
         .DEF_DEFAULT_MESSAGE_ID(ID_ADVERTISE_SYSTEM)
         .DEF_DEFAULT_MESSAGE_ID(ID_DOWNLOAD_PROGRESS)
+        .DEF_DEFAULT_MESSAGE_ID(ID_USER_PACKET_ENUM)
         .export_values();
 
     py::class_<RakNetPacket>(m, "Packet").def_property_readonly("data", [](const RakNetPacket &self) {
