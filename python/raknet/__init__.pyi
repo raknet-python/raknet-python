@@ -20,3 +20,6 @@ class RakPeer:
             RAKNET_STARTED on success, otherwise appropriate failure enumeration.
         """
         ...
+
+
+class StartupError(RuntimeError): ...

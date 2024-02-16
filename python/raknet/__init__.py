@@ -1,4 +1,4 @@
-__all__ = ["RakPeer"]
+__all__ = ["RakPeer", "StartupError"]
 
 for name in __all__:
     from importlib import import_module
@@ -8,3 +8,4 @@ for name in __all__:
     del module
 
 RakPeer = globals()["_RakPeer"]
+StartupError = globals()["_StartupError"]

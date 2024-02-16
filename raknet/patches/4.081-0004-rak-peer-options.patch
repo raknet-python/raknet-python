@@ -145,7 +145,7 @@ index a165253..382cbde 100644
  }
  
 diff --git a/Source/RakPeer.cpp b/Source/RakPeer.cpp
-index 09718de..62bd520 100644
+index 09718de..a800677 100644
 --- a/Source/RakPeer.cpp
 +++ b/Source/RakPeer.cpp
 @@ -15,6 +15,7 @@
@@ -184,6 +184,15 @@ index 09718de..62bd520 100644
  	FillIPList();
  
  	if (myGuid==UNASSIGNED_RAKNET_GUID)
+@@ -524,7 +530,7 @@ StartupResult RakPeer::Startup( unsigned int maxConnections, SocketDescriptor *s
+ 			{
+ 				RakNetSocket2Allocator::DeallocRNS2(r2);
+ 				DerefAllSockets();
+-				return SOCKET_PORT_ALREADY_IN_USE;
++				return SOCKET_FAILED_TO_BIND;
+ 			}
+ 			else if (br==BR_FAILED_SEND_TEST)
+ 			{
 @@ -1213,6 +1219,9 @@ void RakPeer::Shutdown( unsigned int blockDuration, unsigned char orderingChanne
  
  	ClearRemoteSystemLookup();
