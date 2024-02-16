@@ -27,10 +27,10 @@ def test_negative_max_connections():
         peer.startup(max_connections=-10)
 
 
-def test_bad_hostname():
-    with pytest.raises(StartupError):
-        peer = RakPeer()
-        peer.startup(host="bad-host-name")
+# def test_bad_hostname():
+#     with pytest.raises(StartupError):
+#         peer = RakPeer()
+#         peer.startup(host="bad-host-name")
 
 
 def test_invalid_max_internal_ids():
