@@ -13,3 +13,6 @@ patches:
     - patch_file: "patches/4.081-0003-fix-source.patch"
       patch_description: "fix compilation errors"
       patch_type: "conan"
+    - patch_file: "patches/4.081-0004-rak-peer-options.patch"
+      patch_description: "allow overrides for the protocol version and the maximum number of internal ids"
+      patch_type: "conan"

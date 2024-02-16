@@ -1,0 +1,285 @@
+diff --git a/Source/RakNetSocket2.cpp b/Source/RakNetSocket2.cpp
+index 8600460..7a95f25 100644
+--- a/Source/RakNetSocket2.cpp
++++ b/Source/RakNetSocket2.cpp
+@@ -100,7 +100,7 @@ RakNetSocket2* RakNetSocket2Allocator::AllocRNS2(void)
+ #endif
+ 	return s2;
+ }
+-void RakNetSocket2::GetMyIP( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_IDS] )
++void RakNetSocket2::GetMyIP( SystemAddress* addresses, int numOfAddress )
+ {
+ #if defined(WINDOWS_STORE_RT)
+ 	RNS2_WindowsStore8::GetMyIP( addresses );
+@@ -117,9 +117,9 @@ void RakNetSocket2::GetMyIP( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_
+ 
+ 
+ #elif defined(_WIN32)
+-	RNS2_Windows::GetMyIP( addresses );
++	RNS2_Windows::GetMyIP( addresses, numOfAddress );
+ #else
+-	RNS2_Linux::GetMyIP( addresses );
++	RNS2_Linux::GetMyIP( addresses, numOfAddress );
+ #endif
+ }
+ 
+@@ -501,13 +501,13 @@ RNS2SendResult RNS2_Windows::Send( RNS2_SendParameters *sendParameters, const ch
+ 	} 
+ 	return Send_Windows_Linux_360NoVDP(rns2Socket,sendParameters, file, line);
+ }
+-void RNS2_Windows::GetMyIP( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_IDS] ) {return GetMyIP_Windows_Linux(addresses);}
++void RNS2_Windows::GetMyIP( SystemAddress* addresses, int numOfAddress ) {return GetMyIP_Windows_Linux(addresses, numOfAddress);}
+ void RNS2_Windows::SetSocketLayerOverride(SocketLayerOverride *_slo) {slo = _slo;}
+ SocketLayerOverride* RNS2_Windows::GetSocketLayerOverride(void) {return slo;}
+ #else
+ RNS2BindResult RNS2_Linux::Bind( RNS2_BerkleyBindParameters *bindParameters, const char *file, unsigned int line ) {return BindShared(bindParameters, file, line);}
+ RNS2SendResult RNS2_Linux::Send( RNS2_SendParameters *sendParameters, const char *file, unsigned int line ) {return Send_Windows_Linux_360NoVDP(rns2Socket,sendParameters, file, line);}
+-void RNS2_Linux::GetMyIP( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_IDS] ) {return GetMyIP_Windows_Linux(addresses);}
++void RNS2_Linux::GetMyIP( SystemAddress* addresses, int numOfAddress ) {return GetMyIP_Windows_Linux(addresses, numOfAddress);}
+ #endif // Linux
+ 
+ #endif //  defined(__native_client__)
+diff --git a/Source/RakNetSocket2.h b/Source/RakNetSocket2.h
+index 00410a9..bece01f 100644
+--- a/Source/RakNetSocket2.h
++++ b/Source/RakNetSocket2.h
+@@ -128,7 +128,7 @@ public:
+ 	RNS2EventHandler * GetEventHandler(void) const;
+ 
+ 	// ----------- STATICS ------------
+-	static void GetMyIP( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_IDS] );
++	static void GetMyIP( SystemAddress* addresses, int numOfAddress );
+ 	static void DomainNameToIP( const char *domainName, char ip[65] );
+ 
+ protected:
+@@ -423,7 +423,7 @@ public:
+ 	void SetSocketLayerOverride(SocketLayerOverride *_slo);
+ 	SocketLayerOverride* GetSocketLayerOverride(void);
+ 	// ----------- STATICS ------------
+-	static void GetMyIP( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_IDS] );
++	static void GetMyIP( SystemAddress* addresses, int numOfAddress );
+ protected:
+ 	static void GetMyIPIPV4( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_IDS] );
+ 	static void GetMyIPIPV4And6( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_IDS] );
+@@ -438,7 +438,7 @@ public:
+ 	RNS2SendResult Send( RNS2_SendParameters *sendParameters, const char *file, unsigned int line );
+ 
+ 	// ----------- STATICS ------------
+-	static void GetMyIP( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_IDS] );
++	static void GetMyIP( SystemAddress* addresses, int numOfAddress );
+ protected:
+ 	static void GetMyIPIPV4( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_IDS] );
+ 	static void GetMyIPIPV4And6( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_IDS] );
+diff --git a/Source/RakNetSocket2_Windows_Linux.cpp b/Source/RakNetSocket2_Windows_Linux.cpp
+index a165253..382cbde 100644
+--- a/Source/RakNetSocket2_Windows_Linux.cpp
++++ b/Source/RakNetSocket2_Windows_Linux.cpp
+@@ -26,7 +26,7 @@ void PrepareAddrInfoHints2(addrinfo *hints)
+ 	hints->ai_flags = AI_PASSIVE;     // fill in my IP for me
+ }
+ 
+-void GetMyIP_Windows_Linux_IPV4And6( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_IDS] )
++void GetMyIP_Windows_Linux_IPV4And6( SystemAddress* addresses, int numOfAddress )
+ {
+ 	int idx=0;
+ 	char ac[ 80 ];
+@@ -38,7 +38,7 @@ void GetMyIP_Windows_Linux_IPV4And6( SystemAddress addresses[MAXIMUM_NUMBER_OF_I
+ 	PrepareAddrInfoHints2(&hints);
+ 	getaddrinfo(ac, "", &hints, &servinfo);
+ 
+-	for (idx=0, aip = servinfo; aip != NULL && idx < MAXIMUM_NUMBER_OF_INTERNAL_IDS; aip = aip->ai_next, idx++)
++	for (idx=0, aip = servinfo; aip != NULL && idx < numOfAddress; aip = aip->ai_next, idx++)
+ 	{
+ 		if (aip->ai_family == AF_INET)
+ 		{
+@@ -55,7 +55,7 @@ void GetMyIP_Windows_Linux_IPV4And6( SystemAddress addresses[MAXIMUM_NUMBER_OF_I
+ 
+ 	freeaddrinfo(servinfo); // free the linked-list
+ 	
+-	while (idx < MAXIMUM_NUMBER_OF_INTERNAL_IDS)
++	while (idx < numOfAddress)
+ 	{
+ 		addresses[idx]=UNASSIGNED_SYSTEM_ADDRESS;
+ 		idx++;
+@@ -67,7 +67,7 @@ void GetMyIP_Windows_Linux_IPV4And6( SystemAddress addresses[MAXIMUM_NUMBER_OF_I
+ #if (defined(__GNUC__)  || defined(__GCCXML__)) && !defined(__WIN32__)
+ #include <netdb.h>
+ #endif
+-void GetMyIP_Windows_Linux_IPV4( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_IDS] )
++void GetMyIP_Windows_Linux_IPV4( SystemAddress* addresses, int numOfAddress )
+ {
+ 
+ 
+@@ -85,7 +85,7 @@ void GetMyIP_Windows_Linux_IPV4( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTER
+ 		RakAssert(phe!=0);
+ 		return ;
+ 	}
+-	for ( idx = 0; idx < MAXIMUM_NUMBER_OF_INTERNAL_IDS; ++idx )
++	for ( idx = 0; idx < numOfAddress; ++idx )
+ 	{
+ 		if (phe->h_addr_list[ idx ] == 0)
+ 			break;
+@@ -93,7 +93,7 @@ void GetMyIP_Windows_Linux_IPV4( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTER
+ 		memcpy(&addresses[idx].address.addr4.sin_addr,phe->h_addr_list[ idx ],sizeof(struct in_addr));
+ 	}
+ 	
+-	while (idx < MAXIMUM_NUMBER_OF_INTERNAL_IDS)
++	while (idx < numOfAddress)
+ 	{
+ 		addresses[idx]=UNASSIGNED_SYSTEM_ADDRESS;
+ 		idx++;
+@@ -104,12 +104,12 @@ void GetMyIP_Windows_Linux_IPV4( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTER
+ #endif // RAKNET_SUPPORT_IPV6==1
+ 
+ 
+-void GetMyIP_Windows_Linux( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_IDS] )
++void GetMyIP_Windows_Linux( SystemAddress* addresses, int numOfAddress )
+ {
+ 	#if RAKNET_SUPPORT_IPV6==1
+-		GetMyIP_Windows_Linux_IPV4And6(addresses);
++		GetMyIP_Windows_Linux_IPV4And6(addresses, numOfAddress);
+ 	#else
+-		GetMyIP_Windows_Linux_IPV4(addresses);
++		GetMyIP_Windows_Linux_IPV4(addresses, numOfAddress);
+ 	#endif
+ }
+ 
+diff --git a/Source/RakPeer.cpp b/Source/RakPeer.cpp
+index 09718de..62bd520 100644
+--- a/Source/RakPeer.cpp
++++ b/Source/RakPeer.cpp
+@@ -15,6 +15,7 @@
+ 
+ #define CAT_NEUTER_EXPORT /* Neuter dllimport for libcat */
+ 
++#define MAXIMUM_NUMBER_OF_INTERNAL_IDS 20
+ #include "RakNetDefines.h"
+ #include "RakPeer.h"
+ #include "RakNetTypes.h"
+@@ -228,6 +229,7 @@ RakPeer::RakPeer()
+ 	occasionalPing = false;
+ #endif
+ 	allowInternalRouting=false;
++    ipList = RakNet::OP_NEW_ARRAY<SystemAddress>(MAXIMUM_NUMBER_OF_INTERNAL_IDS, _FILE_AND_LINE_ );
+ 	for (unsigned int i=0; i < MAXIMUM_NUMBER_OF_INTERNAL_IDS; i++)
+ 		ipList[i]=UNASSIGNED_SYSTEM_ADDRESS;
+ 	allowConnectionResponseIPMigration = false;
+@@ -369,7 +371,7 @@ RakPeer::~RakPeer()
+ // \param[in] socketDescriptorCount The size of the \a socketDescriptors array.  Pass 1 if you are not sure what to pass.
+ // \return False on failure (can't create socket or thread), true on success.
+ // --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-StartupResult RakPeer::Startup( unsigned int maxConnections, SocketDescriptor *socketDescriptors, unsigned socketDescriptorCount, int threadPriority )
++StartupResult RakPeer::Startup( unsigned int maxConnections, SocketDescriptor *socketDescriptors, unsigned socketDescriptorCount, int threadPriority, int protocolVersion, int maxNumOfInternalIds )
+ {
+ 	if (IsActive())
+ 		return RAKNET_ALREADY_STARTED;
+@@ -398,6 +400,10 @@ StartupResult RakPeer::Startup( unsigned int maxConnections, SocketDescriptor *s
+ 	}
+ 
+ 
++    if (maxNumOfInternalIds <= 0 || maxNumOfInternalIds > MAXIMUM_NUMBER_OF_INTERNAL_IDS)
++        return STARTUP_OTHER_FAILURE;
++
++    maximumNumberOfInternalIds = maxNumOfInternalIds;
+ 	FillIPList();
+ 
+ 	if (myGuid==UNASSIGNED_RAKNET_GUID)
+@@ -1213,6 +1219,9 @@ void RakPeer::Shutdown( unsigned int blockDuration, unsigned char orderingChanne
+ 
+ 	ClearRemoteSystemLookup();
+ 
++    RakNet::OP_DELETE_ARRAY(ipList, _FILE_AND_LINE_);
++    ipList=nullptr;
++
+ #ifdef USE_THREADED_SEND
+ 	RakNet::SendToThread::Deref();
+ #endif
+@@ -3545,7 +3554,7 @@ void RakPeer::OnConnectionRequest( RakPeer::RemoteSystemStruct *remoteSystem, Ra
+ 	SystemIndex systemIndex = (SystemIndex) GetIndexFromSystemAddress( remoteSystem->systemAddress, true );
+ 	RakAssert(systemIndex!=65535);
+ 	bitStream.Write(systemIndex);
+-	for (unsigned int i=0; i < MAXIMUM_NUMBER_OF_INTERNAL_IDS; i++)
++	for (unsigned int i=0; i < maximumNumberOfInternalIds; i++)
+ 		bitStream.Write(ipList[i]);
+ 	bitStream.Write(incomingTimestamp);
+ 	bitStream.Write(RakNet::GetTime());
+@@ -6017,7 +6026,7 @@ bool RakPeer::RunUpdateCycle(BitStream &updateBitStream )
+ 
+ 							inBitStream.IgnoreBits(8);
+ 							inBitStream.Read(bsSystemAddress);
+-							for (unsigned int i=0; i < MAXIMUM_NUMBER_OF_INTERNAL_IDS; i++)
++							for (unsigned int i=0; i < maximumNumberOfInternalIds; i++)
+ 								inBitStream.Read(remoteSystem->theirInternalSystemAddress[i]);
+ 
+ 							RakNet::Time sendPingTime, sendPongTime;
+@@ -6154,7 +6163,7 @@ bool RakPeer::RunUpdateCycle(BitStream &updateBitStream )
+ 								//	inBitStream.Read(remotePort);
+ 								inBitStream.Read(externalID);
+ 								inBitStream.Read(systemIndex);
+-								for (unsigned int i=0; i < MAXIMUM_NUMBER_OF_INTERNAL_IDS; i++)
++								for (unsigned int i=0; i < maximumNumberOfInternalIds; i++)
+ 									inBitStream.Read(remoteSystem->theirInternalSystemAddress[i]);
+ 
+ 								RakNet::Time sendPingTime, sendPongTime;
+@@ -6193,7 +6202,7 @@ bool RakPeer::RunUpdateCycle(BitStream &updateBitStream )
+ 								RakNet::BitStream outBitStream;
+ 								outBitStream.Write((MessageID)ID_NEW_INCOMING_CONNECTION);
+ 								outBitStream.Write(systemAddress);
+-								for (unsigned int i=0; i < MAXIMUM_NUMBER_OF_INTERNAL_IDS; i++)
++								for (unsigned int i=0; i < maximumNumberOfInternalIds; i++)
+ 									outBitStream.Write(ipList[i]);
+ 								outBitStream.Write(sendPongTime);
+ 								outBitStream.Write(RakNet::GetTime());
+@@ -6467,7 +6476,7 @@ void RakPeer::FillIPList(void)
+ 
+ 	// Fill out ipList structure
+ #if  !defined(WINDOWS_STORE_RT)
+-	RakNetSocket2::GetMyIP( ipList );
++	RakNetSocket2::GetMyIP( ipList, MAXIMUM_NUMBER_OF_INTERNAL_IDS );
+ #endif
+ 
+ 	// Sort the addresses from lowest to highest
+diff --git a/Source/RakPeer.h b/Source/RakPeer.h
+index 40ab131..09b8416 100644
+--- a/Source/RakPeer.h
++++ b/Source/RakPeer.h
+@@ -75,7 +75,7 @@ public:
+ 	/// \param[in] socketDescriptorCount The size of the \a socketDescriptors array.  Pass 1 if you are not sure what to pass.
+ 	/// \param[in] threadPriority Passed to the thread creation routine. Use THREAD_PRIORITY_NORMAL for Windows. For Linux based systems, you MUST pass something reasonable based on the thread priorities for your application.
+ 	/// \return RAKNET_STARTED on success, otherwise appropriate failure enumeration.
+-	StartupResult Startup( unsigned int maxConnections, SocketDescriptor *socketDescriptors, unsigned socketDescriptorCount, int threadPriority=-99999 );
++	StartupResult Startup( unsigned int maxConnections, SocketDescriptor *socketDescriptors, unsigned socketDescriptorCount, int threadPriority=-99999, int protocolVersion = RAKNET_PROTOCOL_VERSION, int maxNumOfInternalIds = MAXIMUM_NUMBER_OF_INTERNAL_IDS );
+ 
+ 	/// If you accept connections, you must call this or else security will not be enabled for incoming connections.
+ 	/// This feature requires more round trips, bandwidth, and CPU time for the connection handshake
+@@ -979,7 +979,8 @@ protected:
+ 	// Systems in this list will not go through the secure connection process, even when secure connections are turned on. Wildcards are accepted.
+ 	DataStructures::List<RakNet::RakString> securityExceptionList;
+ 
+-	SystemAddress ipList[ MAXIMUM_NUMBER_OF_INTERNAL_IDS ];
++	SystemAddress* ipList;
++    int maximumNumberOfInternalIds;
+ 
+ 	bool allowInternalRouting;
+ 
+diff --git a/Source/RakPeerInterface.h b/Source/RakPeerInterface.h
+index b654fc9..fa625ed 100644
+--- a/Source/RakPeerInterface.h
++++ b/Source/RakPeerInterface.h
+@@ -17,6 +17,7 @@
+ #ifndef __RAK_PEER_INTERFACE_H
+ #define __RAK_PEER_INTERFACE_H
+ 
++#include "RakNetVersion.h"
+ #include "PacketPriority.h"
+ #include "RakNetTypes.h"
+ #include "RakMemoryOverride.h"
+@@ -61,7 +62,7 @@ public:
+ 	/// \param[in] socketDescriptorCount The size of the \a socketDescriptors array.  Pass 1 if you are not sure what to pass.
+ 	/// \param[in] threadPriority Passed to the thread creation routine. Use THREAD_PRIORITY_NORMAL for Windows. For Linux based systems, you MUST pass something reasonable based on the thread priorities for your application.
+ 	/// \return RAKNET_STARTED on success, otherwise appropriate failure enumeration.
+-	virtual StartupResult Startup( unsigned int maxConnections, SocketDescriptor *socketDescriptors, unsigned socketDescriptorCount, int threadPriority=-99999 )=0;
++	virtual StartupResult Startup( unsigned int maxConnections, SocketDescriptor *socketDescriptors, unsigned socketDescriptorCount, int threadPriority=-99999, int protocolVersion = RAKNET_PROTOCOL_VERSION, int maxNumOfInternalIds = MAXIMUM_NUMBER_OF_INTERNAL_IDS )=0;
+ 
+ 	/// If you accept connections, you must call this or else security will not be enabled for incoming connections.
+ 	/// This feature requires more round trips, bandwidth, and CPU time for the connection handshake
