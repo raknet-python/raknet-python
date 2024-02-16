@@ -1,6 +1,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <string>
+
 #include <raknet/RakNetTypes.h>
 #include <raknet/RakPeer.h>
 
@@ -18,21 +20,23 @@ PYBIND11_MODULE(raknet_python, m) {
     py::register_exception<StartupError>(m, "StartupError", PyExc_RuntimeError);
     py::register_exception<ConnectionAttemptError>(m, "ConnectionAttemptError", PyExc_RuntimeError);
 
-    py::class_<RakNet::Packet>(m, "Packet").def_readonly("data", &RakNet::Packet::data);
+    py::class_<RakNet::Packet>(m, "Packet").def_property_readonly("data", [](const RakNet::Packet &self) {
+        return py::bytes(reinterpret_cast<char *>(self.data), self.length);
+    });
 
     py::class_<RakNet::RakPeer>(m, "RakPeer")
         .def(py::init<>())
 
         .def(
             "startup",
-            [](RakNet::RakPeer &a,
-               const std::string &host,
+            [](RakNet::RakPeer &self,
+               const char *host,
                int port,
                unsigned int max_connections,
                int protocol_version,
                int max_internal_ids) {
-                auto local_addr = RakNet::SocketDescriptor(port, host.c_str());
-                auto result = a.Startup(max_connections, &local_addr, 1, -99999, protocol_version, max_internal_ids);
+                auto local_addr = RakNet::SocketDescriptor(port, host);
+                auto result = self.Startup(max_connections, &local_addr, 1, -99999, protocol_version, max_internal_ids);
                 switch (result) {
                     case RakNet::RAKNET_STARTED:
                         break;
@@ -70,13 +74,13 @@ PYBIND11_MODULE(raknet_python, m) {
 
         .def(
             "connect",
-            [](RakNet::RakPeer &a,
+            [](RakNet::RakPeer &self,
                const std::string &host,
                int remote_port,
                int attempts,
                int attempt_interval_ms,
                int timeout) {
-                auto result = a.Connect(
+                auto result = self.Connect(
                     host.c_str(), remote_port, nullptr, 0, nullptr, 0, attempts, attempt_interval_ms, timeout);
                 switch (result) {
                     case RakNet::CONNECTION_ATTEMPT_STARTED:
@@ -101,7 +105,8 @@ PYBIND11_MODULE(raknet_python, m) {
             py::arg("attempt_interval_ms") = 1000,
             py::arg("timeout") = 0)
 
-        .def("receive", [](RakNet::RakPeer &a) { return std::move(std::unique_ptr<RakNet::Packet>(a.Receive())); })
+        // TODO: we need to call DeallocatePacket
+        .def("receive", &RakNet::RakPeer::Receive, py::return_value_policy::reference)
 
         .def_property("max_incoming_connections",
                       &RakNet::RakPeer::GetMaximumIncomingConnections,
