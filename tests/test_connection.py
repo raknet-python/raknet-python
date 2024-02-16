@@ -1,7 +1,7 @@
 import time
 
 import pytest
-from raknet import RakPeer
+from raknet import RakPeer, MessageIdentifiers
 
 
 @pytest.fixture
@@ -28,7 +28,7 @@ def test_connection(server, client):
         if packet is None:
             continue
 
-        if packet.data[0] == 16:  # ID_CONNECTION_REQUEST_ACCEPTED
+        if packet.data[0] == MessageIdentifiers.ID_CONNECTION_REQUEST_ACCEPTED:
             return
 
     assert False, "Connection has not been accepted after 5 seconds"

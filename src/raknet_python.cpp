@@ -3,6 +3,7 @@
 
 #include <string>
 
+#include <raknet/MessageIdentifiers.h>
 #include <raknet/RakNetTypes.h>
 #include <raknet/RakPeer.h>
 
@@ -28,9 +29,47 @@ private:
     RakNet::Packet &packet_;
 };
 
+class MessageIdentifiers {};
+#define DEF_DEFAULT_MESSAGE_ID(name) value(#name, DefaultMessageIDTypes::name)
+
 PYBIND11_MODULE(raknet_python, m) {
     py::register_exception<StartupError>(m, "StartupError", PyExc_RuntimeError);
     py::register_exception<ConnectionAttemptError>(m, "ConnectionAttemptError", PyExc_RuntimeError);
+
+    auto message_id = py::class_<MessageIdentifiers>(m, "MessageIdentifiers");
+    py::enum_<DefaultMessageIDTypes>(message_id, "DefaultMessageIDTypes")
+        .DEF_DEFAULT_MESSAGE_ID(ID_CONNECTED_PING)
+        .DEF_DEFAULT_MESSAGE_ID(ID_UNCONNECTED_PING)
+        .DEF_DEFAULT_MESSAGE_ID(ID_UNCONNECTED_PING_OPEN_CONNECTIONS)
+        .DEF_DEFAULT_MESSAGE_ID(ID_CONNECTED_PONG)
+        .DEF_DEFAULT_MESSAGE_ID(ID_DETECT_LOST_CONNECTIONS)
+        .DEF_DEFAULT_MESSAGE_ID(ID_OPEN_CONNECTION_REQUEST_1)
+        .DEF_DEFAULT_MESSAGE_ID(ID_OPEN_CONNECTION_REPLY_1)
+        .DEF_DEFAULT_MESSAGE_ID(ID_OPEN_CONNECTION_REQUEST_2)
+        .DEF_DEFAULT_MESSAGE_ID(ID_OPEN_CONNECTION_REPLY_2)
+        .DEF_DEFAULT_MESSAGE_ID(ID_CONNECTION_REQUEST)
+        .DEF_DEFAULT_MESSAGE_ID(ID_REMOTE_SYSTEM_REQUIRES_PUBLIC_KEY)
+        .DEF_DEFAULT_MESSAGE_ID(ID_OUR_SYSTEM_REQUIRES_SECURITY)
+        .DEF_DEFAULT_MESSAGE_ID(ID_PUBLIC_KEY_MISMATCH)
+        .DEF_DEFAULT_MESSAGE_ID(ID_OUT_OF_BAND_INTERNAL)
+        .DEF_DEFAULT_MESSAGE_ID(ID_SND_RECEIPT_ACKED)
+        .DEF_DEFAULT_MESSAGE_ID(ID_SND_RECEIPT_LOSS)
+        .DEF_DEFAULT_MESSAGE_ID(ID_CONNECTION_REQUEST_ACCEPTED)
+        .DEF_DEFAULT_MESSAGE_ID(ID_CONNECTION_ATTEMPT_FAILED)
+        .DEF_DEFAULT_MESSAGE_ID(ID_ALREADY_CONNECTED)
+        .DEF_DEFAULT_MESSAGE_ID(ID_NEW_INCOMING_CONNECTION)
+        .DEF_DEFAULT_MESSAGE_ID(ID_NO_FREE_INCOMING_CONNECTIONS)
+        .DEF_DEFAULT_MESSAGE_ID(ID_DISCONNECTION_NOTIFICATION)
+        .DEF_DEFAULT_MESSAGE_ID(ID_CONNECTION_LOST)
+        .DEF_DEFAULT_MESSAGE_ID(ID_CONNECTION_BANNED)
+        .DEF_DEFAULT_MESSAGE_ID(ID_INVALID_PASSWORD)
+        .DEF_DEFAULT_MESSAGE_ID(ID_INCOMPATIBLE_PROTOCOL_VERSION)
+        .DEF_DEFAULT_MESSAGE_ID(ID_IP_RECENTLY_CONNECTED)
+        .DEF_DEFAULT_MESSAGE_ID(ID_TIMESTAMP)
+        .DEF_DEFAULT_MESSAGE_ID(ID_UNCONNECTED_PONG)
+        .DEF_DEFAULT_MESSAGE_ID(ID_ADVERTISE_SYSTEM)
+        .DEF_DEFAULT_MESSAGE_ID(ID_DOWNLOAD_PROGRESS)
+        .export_values();
 
     py::class_<RakNetPacket>(m, "Packet").def_property_readonly("data", [](const RakNetPacket &self) {
         return py::bytes(self.data(), self.length());
