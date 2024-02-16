@@ -2,14 +2,18 @@
 
 #include "rak_peer.h"
 
-#include "raknet_error.h"
-
 #include <raknet/RakNetTypes.h>
 #include <raknet/RakPeer.h>
 
 namespace py = pybind11;
 
+struct StartupError : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+
 void def_rak_peer(pybind11::module &m) {
+    py::register_local_exception<StartupError>(m, "StartupError", PyExc_RuntimeError);
+
     py::class_<RakNet::RakPeer>(m, "RakPeer")
         .def(py::init<>())
         .def(
