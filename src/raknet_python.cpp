@@ -72,6 +72,24 @@ PYBIND11_MODULE(raknet_python, m) {
         .DEF_DEFAULT_MESSAGE_ID(ID_USER_PACKET_ENUM)
         .export_values();
 
+    py::enum_<PacketPriority>(m, "PacketPriority")
+        .value("IMMEDIATE_PRIORITY", PacketPriority::IMMEDIATE_PRIORITY)
+        .value("HIGH_PRIORITY", PacketPriority::HIGH_PRIORITY)
+        .value("MEDIUM_PRIORITY", PacketPriority::MEDIUM_PRIORITY)
+        .value("LOW_PRIORITY", PacketPriority::LOW_PRIORITY)
+        .export_values();
+
+    py::enum_<PacketReliability>(m, "PacketReliability")
+        .value("UNRELIABLE", PacketReliability::UNRELIABLE)
+        .value("UNRELIABLE_SEQUENCED", PacketReliability::UNRELIABLE_SEQUENCED)
+        .value("RELIABLE", PacketReliability::RELIABLE)
+        .value("RELIABLE_ORDERED", PacketReliability::RELIABLE_ORDERED)
+        .value("RELIABLE_SEQUENCED", PacketReliability::RELIABLE_SEQUENCED)
+        .value("UNRELIABLE_WITH_ACK_RECEIPT", PacketReliability::UNRELIABLE_WITH_ACK_RECEIPT)
+        .value("RELIABLE_WITH_ACK_RECEIPT", PacketReliability::RELIABLE_WITH_ACK_RECEIPT)
+        .value("RELIABLE_ORDERED_WITH_ACK_RECEIPT", PacketReliability::RELIABLE_ORDERED_WITH_ACK_RECEIPT)
+        .export_values();
+
     py::class_<RakNetPacket>(m, "Packet").def_property_readonly("data", [](const RakNetPacket &self) {
         return py::bytes(self.data(), self.length());
     });
@@ -165,6 +183,38 @@ PYBIND11_MODULE(raknet_python, m) {
                  }
                  return std::make_unique<RakNetPacket>(self, *packet);
              })
+
+        .def(
+            "send",
+            [](RakNet::RakPeer &self,
+               const py::bytes &data,
+               PacketPriority priority,
+               PacketReliability reliability,
+               char ordering_channel,
+               const std::string &host,
+               int port,
+               uint32_t force_receipt_num) {
+                char *buffer = nullptr;
+                py::ssize_t length = 0;
+                if (PYBIND11_BYTES_AS_STRING_AND_SIZE(data.ptr(), &buffer, &length) != 0) {
+                    throw py::error_already_set();
+                }
+                return self.Send(buffer,
+                                 static_cast<int>(length),
+                                 priority,
+                                 reliability,
+                                 ordering_channel,
+                                 RakNet::SystemAddress(host.c_str(), port),
+                                 false,
+                                 force_receipt_num);
+            },
+            py::arg("data"),
+            py::arg("priority"),
+            py::arg("reliability"),
+            py::arg("ordering_channel"),
+            py::arg("host"),
+            py::arg("port"),
+            py::arg("force_receipt_num") = 0)
 
         .def_property("max_incoming_connections",
                       &RakNet::RakPeer::GetMaximumIncomingConnections,
