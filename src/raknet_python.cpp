@@ -24,6 +24,7 @@ public:
     ~RakNetPacket() { peer_.DeallocatePacket(&packet_); }
     [[nodiscard]] const char *data() const { return reinterpret_cast<const char *>(packet_.data); }
     [[nodiscard]] size_t length() const { return packet_.length; }
+    [[nodiscard]] const RakNet::SystemAddress &sender() const { return packet_.systemAddress; }
 
 private:
     RakNet::RakPeer &peer_;
@@ -90,9 +91,11 @@ PYBIND11_MODULE(raknet_python, m) {
         .value("RELIABLE_ORDERED_WITH_ACK_RECEIPT", PacketReliability::RELIABLE_ORDERED_WITH_ACK_RECEIPT)
         .export_values();
 
-    py::class_<RakNetPacket>(m, "Packet").def_property_readonly("data", [](const RakNetPacket &self) {
-        return py::bytes(self.data(), self.length());
-    });
+    py::class_<RakNetPacket>(m, "Packet")
+        .def_property_readonly("data", [](const RakNetPacket &self) { return py::bytes(self.data(), self.length()); })
+        .def_property_readonly("sender", [](const RakNetPacket &self) {
+            return py::make_tuple(self.sender().ToString(false), self.sender().GetPort());
+        });
 
     py::class_<RakNet::RakPeer>(m, "RakPeer")
         .def(py::init<>())
@@ -190,7 +193,7 @@ PYBIND11_MODULE(raknet_python, m) {
                const py::bytes &data,
                PacketPriority priority,
                PacketReliability reliability,
-               char ordering_channel,
+               int ordering_channel,
                const std::string &host,
                int port,
                uint32_t force_receipt_num) {
@@ -203,7 +206,7 @@ PYBIND11_MODULE(raknet_python, m) {
                                  static_cast<int>(length),
                                  priority,
                                  reliability,
-                                 ordering_channel,
+                                 static_cast<char>(ordering_channel & 0xff),
                                  RakNet::SystemAddress(host.c_str(), port),
                                  false,
                                  force_receipt_num);
