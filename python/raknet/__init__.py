@@ -1,4 +1,5 @@
-__all__ = ["RakPeer", "Packet", "MessageIdentifiers", "ConnectionAttemptError", "StartupError", ]
+__all__ = ["RakPeer", "Packet", "PacketPriority", "PacketReliability", "MessageIdentifiers", "ConnectionAttemptError",
+           "StartupError", ]
 
 for name in __all__:
     from importlib import import_module
@@ -9,6 +10,8 @@ for name in __all__:
 
 RakPeer = globals()["_RakPeer"]
 Packet = globals()["_Packet"]
+PacketPriority = globals()["_PacketPriority"]
+PacketReliability = globals()["_PacketReliability"]
 MessageIdentifiers = globals()["_MessageIdentifiers"]
 ConnectionAttemptError = globals()["_ConnectionAttemptError"]
 StartupError = globals()["_StartupError"]

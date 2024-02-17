@@ -19,7 +19,7 @@ def client():
     return client
 
 
-def test_connection(server, client):
+def test_connect_and_receive(server, client):
     client.connect("127.0.0.1", 60000)
     timeout = time.time() + 5
 

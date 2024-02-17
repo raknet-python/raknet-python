@@ -1,3 +1,4 @@
+#include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -30,14 +31,14 @@ private:
 };
 
 class MessageIdentifiers {};
-#define DEF_DEFAULT_MESSAGE_ID(name) value(#name, DefaultMessageIDTypes::name)
+#define DEF_DEFAULT_MESSAGE_ID(name)                                                                                   \
+    def_property_readonly_static(#name, [](const py::object &) -> unsigned char { return DefaultMessageIDTypes::name; })
 
 PYBIND11_MODULE(raknet_python, m) {
     py::register_exception<StartupError>(m, "StartupError", PyExc_RuntimeError);
     py::register_exception<ConnectionAttemptError>(m, "ConnectionAttemptError", PyExc_RuntimeError);
 
-    auto message_id = py::class_<MessageIdentifiers>(m, "MessageIdentifiers");
-    py::enum_<DefaultMessageIDTypes>(message_id, "DefaultMessageIDTypes")
+    py::class_<MessageIdentifiers>(m, "MessageIdentifiers")
         .DEF_DEFAULT_MESSAGE_ID(ID_CONNECTED_PING)
         .DEF_DEFAULT_MESSAGE_ID(ID_UNCONNECTED_PING)
         .DEF_DEFAULT_MESSAGE_ID(ID_UNCONNECTED_PING_OPEN_CONNECTIONS)
@@ -69,8 +70,7 @@ PYBIND11_MODULE(raknet_python, m) {
         .DEF_DEFAULT_MESSAGE_ID(ID_UNCONNECTED_PONG)
         .DEF_DEFAULT_MESSAGE_ID(ID_ADVERTISE_SYSTEM)
         .DEF_DEFAULT_MESSAGE_ID(ID_DOWNLOAD_PROGRESS)
-        .DEF_DEFAULT_MESSAGE_ID(ID_USER_PACKET_ENUM)
-        .export_values();
+        .DEF_DEFAULT_MESSAGE_ID(ID_USER_PACKET_ENUM);
 
     py::enum_<PacketPriority>(m, "PacketPriority")
         .value("IMMEDIATE_PRIORITY", PacketPriority::IMMEDIATE_PRIORITY)
