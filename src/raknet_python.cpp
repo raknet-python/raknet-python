@@ -4,7 +4,7 @@
 
 #include <raknet/MessageIdentifiers.h>
 #include <raknet/RakNetTypes.h>
-#include <raknet/RakPeer.h>
+#include <raknet/RakPeerInterface.h>
 
 namespace raknet {
 namespace python {
@@ -21,15 +21,19 @@ struct ConnectionAttemptError : public std::runtime_error {
 
 class Packet {
 public:
-    Packet(RakNet::RakPeer &peer, RakNet::Packet &packet) : peer_(peer), packet_(packet) {}
+    Packet(RakNet::RakPeerInterface &peer, RakNet::Packet &packet) : peer_(peer), packet_(packet) {}
     ~Packet() { peer_.DeallocatePacket(&packet_); }
     [[nodiscard]] const char *data() const { return reinterpret_cast<const char *>(packet_.data); }
     [[nodiscard]] size_t length() const { return packet_.length; }
     [[nodiscard]] const RakNet::SystemAddress &systemAddress() const { return packet_.systemAddress; }
 
 private:
-    RakNet::RakPeer &peer_;
+    RakNet::RakPeerInterface &peer_;
     RakNet::Packet &packet_;
+};
+
+struct RakPeerInterfaceDeleter {
+    void operator()(RakNet::RakPeerInterface *p) { RakNet::RakPeerInterface::DestroyInstance(p); }
 };
 
 class MessageIdentifiers {};
@@ -98,12 +102,16 @@ PYBIND11_MODULE(raknet_python, m) {
             return py::make_tuple(self.systemAddress().ToString(false), self.systemAddress().GetPort());
         });
 
-    py::class_<RakNet::RakPeer>(m, "RakPeer")
-        .def(py::init<>())
+    py::class_<RakNet::RakPeerInterface, std::unique_ptr<RakNet::RakPeerInterface, RakPeerInterfaceDeleter>>(m,
+                                                                                                             "RakPeer")
+        .def(py::init([]() {
+            return std::unique_ptr<RakNet::RakPeerInterface, RakPeerInterfaceDeleter>(
+                RakNet::RakPeerInterface::GetInstance());
+        }))
 
         .def(
             "startup",
-            [](RakNet::RakPeer &self,
+            [](RakNet::RakPeerInterface &self,
                const char *host,
                unsigned short port,
                unsigned int max_connections,
@@ -153,7 +161,7 @@ PYBIND11_MODULE(raknet_python, m) {
 
         .def(
             "connect",
-            [](RakNet::RakPeer &self,
+            [](RakNet::RakPeerInterface &self,
                const std::string &host,
                unsigned short port,
                unsigned int num_attempts,
@@ -185,7 +193,7 @@ PYBIND11_MODULE(raknet_python, m) {
             py::arg("timeout") = 0)
 
         .def("receive",
-             [](RakNet::RakPeer &self) -> std::unique_ptr<Packet> {
+             [](RakNet::RakPeerInterface &self) -> std::unique_ptr<Packet> {
                  auto *packet = self.Receive();
                  if (!packet) {
                      return nullptr;
@@ -195,7 +203,7 @@ PYBIND11_MODULE(raknet_python, m) {
 
         .def(
             "send",
-            [](RakNet::RakPeer &self,
+            [](RakNet::RakPeerInterface &self,
                const py::bytes &data,
                PacketPriority priority,
                PacketReliability reliability,
@@ -227,21 +235,25 @@ PYBIND11_MODULE(raknet_python, m) {
 
         .def(
             "shutdown",
-            [](RakNet::RakPeer &self,
-               unsigned short timeout,
+            [](RakNet::RakPeerInterface &self,
+               float timeout_secs,
                unsigned int ordering_channel,
                PacketPriority notification_priority) {
-                self.Shutdown(timeout, static_cast<char>(ordering_channel & 0xff), notification_priority);
+                if (timeout_secs < 0) {
+                    throw std::invalid_argument("Invalid argument: timeout_secs cannot be less than 0.");
+                }
+                auto block_duration = static_cast<unsigned int>(timeout_secs * 1000);
+                self.Shutdown(block_duration, static_cast<char>(ordering_channel & 0xff), notification_priority);
             },
-            py::arg("timeout"),
-            py::arg("ordering_channel"),
-            py::arg("disconnection_notification_priority"))
+            py::arg("timeout_secs"),
+            py::arg("ordering_channel") = 0,
+            py::arg("disconnection_notification_priority") = PacketPriority::LOW_PRIORITY)
 
-        .def_property_readonly("active", &RakNet::RakPeer::IsActive)
-        .def_property_readonly("num_connections", &RakNet::RakPeer::NumberOfConnections)
+        .def_property_readonly("active", &RakNet::RakPeerInterface::IsActive)
+        .def_property_readonly("num_connections", &RakNet::RakPeerInterface::NumberOfConnections)
         .def_property("max_incoming_connections",
-                      &RakNet::RakPeer::GetMaximumIncomingConnections,
-                      &RakNet::RakPeer::SetMaximumIncomingConnections);
+                      &RakNet::RakPeerInterface::GetMaximumIncomingConnections,
+                      &RakNet::RakPeerInterface::SetMaximumIncomingConnections);
 }
 } // namespace python
 } // namespace raknet
