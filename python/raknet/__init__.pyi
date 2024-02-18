@@ -1,11 +1,14 @@
+# @formatter:off # fmt: off
 import typing
 
 
 class ConnectionAttemptError(RuntimeError):
-    pass
+    ...
+
 
 class StartupError(RuntimeError):
-    pass
+    ...
+
 
 class MessageIdentifiers:
     ID_ADVERTISE_SYSTEM: typing.ClassVar[int] = 29
@@ -44,8 +47,9 @@ class MessageIdentifiers:
 
 class Packet:
     @property
-    def data(self) -> bytes:
-        ...
+    def data(self) -> bytes: ...
+    @property
+    def system_address(self) -> tuple: ...
 
 
 class PacketPriority:
@@ -53,6 +57,7 @@ class PacketPriority:
     IMMEDIATE_PRIORITY: typing.ClassVar[PacketPriority]  # value = <PacketPriority.IMMEDIATE_PRIORITY: 0>
     LOW_PRIORITY: typing.ClassVar[PacketPriority]  # value = <PacketPriority.LOW_PRIORITY: 3>
     MEDIUM_PRIORITY: typing.ClassVar[PacketPriority]  # value = <PacketPriority.MEDIUM_PRIORITY: 2>
+
 
 class PacketReliability:
     RELIABLE: typing.ClassVar[PacketReliability]  # value = <PacketReliability.RELIABLE: 2>
@@ -69,11 +74,21 @@ class RakPeer:
     max_incoming_connections: int
     def __init__(self) -> None:
         ...
-    def connect(self, host: str, port: int, attempts: int = 6, attempt_interval_ms: int = 1000, timeout: int = 0) -> None:
+    def connect(self, host: str, port: int, num_attempts: int = 6, attempt_interval_ms: int = 1000, timeout: int = 0) -> None:
         ...
     def receive(self) -> Packet:
         ...
-    def send(self, data: bytes, priority: PacketPriority, reliability: PacketReliability, ordering_channel: str, host: str, port: int, force_receipt_num: int = 0) -> int:
+    def send(self, data: bytes, priority: PacketPriority, reliability: PacketReliability, ordering_channel: int, host: str, port: int, force_receipt_num: int = 0) -> int:
+        ...
+    def shutdown(self, timeout_secs: float, ordering_channel: int = 0, disconnection_notification_priority: PacketPriority = ...) -> None:
         ...
     def startup(self, host: str = None, port: int = 0, max_connections: int = 1, protocol_version: int = 6, max_internal_ids: int = 10) -> None:
         ...
+    @property
+    def active(self) -> bool:
+        ...
+    @property
+    def num_connections(self) -> int:
+        ...
+
+# @formatter:on # fmt: on

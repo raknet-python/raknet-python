@@ -1,5 +1,12 @@
-__all__ = ["RakPeer", "Packet", "PacketPriority", "PacketReliability", "MessageIdentifiers", "ConnectionAttemptError",
-           "StartupError", ]
+__all__ = [
+    "RakPeer",
+    "Packet",
+    "PacketPriority",
+    "PacketReliability",
+    "MessageIdentifiers",
+    "ConnectionAttemptError",
+    "StartupError",
+]
 
 for name in __all__:
     from importlib import import_module

@@ -24,7 +24,7 @@ def run_server():
         elif packet.data[0] == MessageIdentifiers.ID_CONNECTION_LOST:
             print("A client lost the connection.")
         elif packet.data[0] == ID_GAME_MESSAGE_1:
-            print(packet.data[1:].decode())
+            assert packet.data[1:] == b"Hello, World"
             success = True
 
     assert success, "Game message was not received after 2 seconds"
