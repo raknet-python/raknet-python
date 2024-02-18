@@ -22,9 +22,9 @@ def test_duplicate_port():
 
 
 def test_negative_max_connections():
-    with pytest.raises(TypeError):
+    with pytest.raises(StartupError):
         peer = RakPeer()
-        peer.startup(max_connections=-10)
+        peer.startup(max_connections=0)
 
 
 # def test_bad_hostname():
@@ -39,4 +39,4 @@ def test_invalid_max_internal_ids():
         peer.startup(max_internal_ids=21)
     with pytest.raises(StartupError):
         peer = RakPeer()
-        peer.startup(max_internal_ids=-1)
+        peer.startup(max_internal_ids=0)

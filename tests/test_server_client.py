@@ -51,7 +51,7 @@ def run_client():
             print('Connection lost.')
         if packet.data[0] == MessageIdentifiers.ID_CONNECTION_REQUEST_ACCEPTED:
             print('Our connection request has been accepted.')
-            host, port = packet.sender
+            host, port = packet.system_address
             client.send(bytes([ID_GAME_MESSAGE_1]) + b"Hello, World", PacketPriority.HIGH_PRIORITY,
                         PacketReliability.RELIABLE_ORDERED,
                         0, host, port)
