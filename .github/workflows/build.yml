@@ -7,6 +7,7 @@ jobs:
     name: Build wheel (${{ matrix.python }}-${{ matrix.machine.platform }})
     runs-on: ${{ matrix.machine.os }}
     strategy:
+      fail-fast: false
       matrix:
         machine:
           - { os: 'windows-latest', platform: 'win_amd64' }
