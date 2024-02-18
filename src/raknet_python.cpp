@@ -199,7 +199,7 @@ PYBIND11_MODULE(raknet_python, m) {
                const py::bytes &data,
                PacketPriority priority,
                PacketReliability reliability,
-               int ordering_channel,
+               unsigned int ordering_channel,
                const std::string &host,
                int port,
                uint32_t force_receipt_num) {
@@ -225,6 +225,20 @@ PYBIND11_MODULE(raknet_python, m) {
             py::arg("port"),
             py::arg("force_receipt_num") = 0)
 
+        .def(
+            "shutdown",
+            [](RakNet::RakPeer &self,
+               unsigned short timeout,
+               unsigned int ordering_channel,
+               PacketPriority notification_priority) {
+                self.Shutdown(timeout, static_cast<char>(ordering_channel & 0xff), notification_priority);
+            },
+            py::arg("timeout"),
+            py::arg("ordering_channel"),
+            py::arg("disconnection_notification_priority"))
+
+        .def_property_readonly("active", &RakNet::RakPeer::IsActive)
+        .def_property_readonly("num_connections", &RakNet::RakPeer::NumberOfConnections)
         .def_property("max_incoming_connections",
                       &RakNet::RakPeer::GetMaximumIncomingConnections,
                       &RakNet::RakPeer::SetMaximumIncomingConnections);
