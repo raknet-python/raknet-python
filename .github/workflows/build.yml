@@ -13,7 +13,7 @@ jobs:
           - { os: 'windows-latest', platform: 'win_amd64' }
           - { os: 'ubuntu-latest', platform: 'manylinux_x86_64' }
           - { os: 'macos-latest', platform: 'macosx_x86_64' }
-        python: [ "cp39", "cp310", "cp311", "cp312" ]
+        python: [ "cp39", "cp310", "cp311", "cp312", "pp39", "pp310" ]
 
     steps:
       - name: Checkout Code
