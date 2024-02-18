@@ -1,18 +1,4 @@
 sources:
   "4.081":
-    url: "https://github.com/facebookarchive/RakNet/archive/1a169895a900c9fc4841c556e16514182b75faf8.tar.gz"
-    sha256: "79d42a4daef9201ba93a4204257d740ffa6d225e37805b8a3b915c350b721144"
-patches:
-  "4.081":
-    - patch_file: "patches/4.081-0001-fix-static-lib-cmake.patch"
-      patch_description: "fix CMakeLists.txt for RakNetLibStatic"
-      patch_type: "conan"
-    - patch_file: "patches/4.081-0002-fix-shared-lib-cmake.patch"
-      patch_description: "fix CMakeLists.txt for RakNetDLL"
-      patch_type: "conan"
-    - patch_file: "patches/4.081-0003-fix-source.patch"
-      patch_description: "fix compilation errors"
-      patch_type: "conan"
-    - patch_file: "patches/4.081-0004-rak-peer-options.patch"
-      patch_description: "allow overrides for the protocol version and the maximum number of internal ids"
-      patch_type: "conan"
+    url: "https://github.com/raknet-python/raknet/archive/5d089c28b74f464edd1cf33693a5dc5f99e4e7b7.tar.gz"
+    sha256: "df80d8228198fbd6743c283a70bf8f0c9bf7bed75aa0b0b99d25d663898c3bc8"
