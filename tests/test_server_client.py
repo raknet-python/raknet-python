@@ -8,8 +8,8 @@ ID_GAME_MESSAGE_1 = MessageIdentifiers.ID_USER_PACKET_ENUM + 1
 
 def run_server():
     server = RakPeer()
-    server.startup(port=60000, max_connections=10)
     server.max_incoming_connections = 10
+    server.startup(port=60000, max_connections=10)
 
     timeout = time.time() + 2
     success = False
