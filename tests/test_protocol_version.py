@@ -39,8 +39,8 @@ def test_compatible_2():
 
 
 def test_incompatible_1():
-    do_test(6, 11)
+    do_test(7, 8)
 
 
 def test_incompatible_2():
-    do_test(11, 6)
+    do_test(10, 9)
