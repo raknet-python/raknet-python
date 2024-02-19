@@ -36,7 +36,7 @@ class MessageIdentifiers {};
 #define DEF_DEFAULT_MESSAGE_ID(name)                                                                                   \
     def_property_readonly_static(#name, [](const py::object &) -> unsigned char { return DefaultMessageIDTypes::name; })
 
-PYBIND11_MODULE(raknet_python, m) {
+PYBIND11_MODULE(_raknet, m) {
     py::register_exception<StartupError>(m, "StartupError", PyExc_RuntimeError);
     py::register_exception<ConnectionAttemptError>(m, "ConnectionAttemptError", PyExc_RuntimeError);
 
