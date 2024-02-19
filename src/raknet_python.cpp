@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 
 #include <string>
+#include <utility>
 
 #include <raknet/MessageIdentifiers.h>
 #include <raknet/RakNetTypes.h>
@@ -19,20 +20,15 @@ struct ConnectionAttemptError : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 
-class Packet {
-public:
-    Packet(RakNet::RakPeerInterface &peer, RakNet::Packet &packet) : peer_(peer), packet_(packet) {}
-    ~Packet() { peer_.DeallocatePacket(&packet_); }
-    [[nodiscard]] const char *data() const { return reinterpret_cast<const char *>(packet_.data); }
-    [[nodiscard]] size_t length() const { return packet_.length; }
-    [[nodiscard]] const RakNet::SystemAddress &systemAddress() const { return packet_.systemAddress; }
+struct Packet {
+    Packet(py::bytes payload, const RakNet::SystemAddress &address)
+        : data(std::move(payload)), system_address(address) {}
 
-private:
-    RakNet::RakPeerInterface &peer_;
-    RakNet::Packet &packet_;
+    py::bytes data;
+    RakNet::SystemAddress system_address;
 };
 
-struct RakPeerInterfaceDeleter {
+struct RakPeerDeleter {
     void operator()(RakNet::RakPeerInterface *p) { RakNet::RakPeerInterface::DestroyInstance(p); }
 };
 
@@ -97,16 +93,14 @@ PYBIND11_MODULE(raknet_python, m) {
         .export_values();
 
     py::class_<Packet>(m, "Packet")
-        .def_property_readonly("data", [](const Packet &self) { return py::bytes(self.data(), self.length()); })
+        .def_readonly("data", &Packet::data)
         .def_property_readonly("system_address", [](const Packet &self) {
-            return py::make_tuple(self.systemAddress().ToString(false), self.systemAddress().GetPort());
+            return py::make_tuple(self.system_address.ToString(false), self.system_address.GetPort());
         });
 
-    py::class_<RakNet::RakPeerInterface, std::unique_ptr<RakNet::RakPeerInterface, RakPeerInterfaceDeleter>>(m,
-                                                                                                             "RakPeer")
+    py::class_<RakNet::RakPeerInterface, std::unique_ptr<RakNet::RakPeerInterface, RakPeerDeleter>>(m, "RakPeer")
         .def(py::init([]() {
-            return std::unique_ptr<RakNet::RakPeerInterface, RakPeerInterfaceDeleter>(
-                RakNet::RakPeerInterface::GetInstance());
+            return std::unique_ptr<RakNet::RakPeerInterface, RakPeerDeleter>(RakNet::RakPeerInterface::GetInstance());
         }))
 
         .def(
@@ -194,11 +188,14 @@ PYBIND11_MODULE(raknet_python, m) {
 
         .def("receive",
              [](RakNet::RakPeerInterface &self) -> std::unique_ptr<Packet> {
-                 auto *packet = self.Receive();
-                 if (!packet) {
+                 auto *p = self.Receive();
+                 if (!p) {
                      return nullptr;
                  }
-                 return std::make_unique<Packet>(self, *packet);
+                 auto packet = std::make_unique<Packet>(py::bytes(reinterpret_cast<const char *>(p->data), p->length),
+                                                        p->systemAddress);
+                 self.DeallocatePacket(p);
+                 return packet;
              })
 
         .def(

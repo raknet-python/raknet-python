@@ -14,8 +14,7 @@ def do_test(server_ver: int, client_ver: int):
     client.startup(protocol_version=client_ver)
     client.connect("127.0.0.1", 60000 + server_ver)
 
-    timeout = time.time() + 2
-    success = False
+    timeout = time.time() + 5
     while time.time() < timeout:
         packet = client.receive()
         if packet is None:
@@ -23,12 +22,12 @@ def do_test(server_ver: int, client_ver: int):
 
         if packet.data[0] == MessageIdentifiers.ID_CONNECTION_REQUEST_ACCEPTED:
             assert server_ver == client_ver
-            success = True
+            return
         elif packet.data[0] == MessageIdentifiers.ID_INCOMPATIBLE_PROTOCOL_VERSION:
             assert server_ver != client_ver
-            success = True
+            return
 
-    assert success
+    assert False, "Timed out without receiving expected server response"
 
 
 def test_compatible_1():

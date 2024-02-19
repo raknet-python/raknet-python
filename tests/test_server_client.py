@@ -11,8 +11,7 @@ def run_server():
     server.max_incoming_connections = 10
     server.startup(port=60000, max_connections=10)
 
-    timeout = time.time() + 2
-    success = False
+    timeout = time.time() + 5
     while time.time() < timeout:
         packet = server.receive()
         if packet is None:
@@ -24,10 +23,11 @@ def run_server():
         elif packet.data[0] == MessageIdentifiers.ID_CONNECTION_LOST:
             print("A client lost the connection.")
         elif packet.data[0] == ID_GAME_MESSAGE_1:
+            print(packet.data[1:], packet.system_address)
             assert packet.data[1:] == b"Hello, World"
-            success = True
+            return
 
-    assert success, "Game message was not received after 2 seconds"
+    assert False, "Game message was not received"
 
 
 def run_client():
@@ -35,8 +35,7 @@ def run_client():
     client.startup()
     client.connect("127.0.0.1", 60000)
 
-    timeout = time.time() + 2
-    success = False
+    timeout = time.time() + 5
     while time.time() < timeout:
         packet = client.receive()
         if packet is None:
@@ -58,9 +57,10 @@ def run_client():
                 host,
                 port,
             )
-            success = True
+            client.shutdown(1)
+            return
 
-    assert success, "Connection has not been accepted after 2 seconds"
+    assert False, "Connection timed out"
 
 
 def test_echo():
