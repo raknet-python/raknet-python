@@ -1,0 +1,33 @@
+FROM python:3.12-slim-bullseye
+
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONIOENCODING=UTF-8
+
+ARG CMAKE_VERSION=3.26.6
+
+RUN apt-get update -y -q \
+    && apt-get install -y -q curl valgrind lsb-release wget git gcc g++ gdb make ninja-build openssh-server \
+    && wget https://github.com/Kitware/CMake/releases/download/v${CMAKE_VERSION}/cmake-${CMAKE_VERSION}-linux-x86_64.sh \
+    && chmod +x cmake-${CMAKE_VERSION}-linux-x86_64.sh \
+    && ./cmake-${CMAKE_VERSION}-linux-x86_64.sh --skip-license --exclude-subdir --prefix=/usr/local \
+    && rm cmake-${CMAKE_VERSION}-linux-x86_64.sh \
+    && python -m pip install --upgrade pip \
+    && pip install conan \
+    && apt-get clean -y -q \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m -s /bin/bash developer \
+    && echo "developer:developer" | chpasswd \
+    && adduser developer sudo \
+    && echo "developer ALL= NOPASSWD: ALL\\n" >> /etc/sudoers
+
+RUN ( \
+    echo 'LogLevel DEBUG2'; \
+    echo 'PasswordAuthentication yes'; \
+    echo 'Subsystem sftp /usr/lib/openssh/sftp-server'; \
+  ) > /etc/ssh/sshd_config_endstone \
+  && mkdir /run/sshd
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd", "-D", "-e", "-f", "/etc/ssh/sshd_config_endstone"]
