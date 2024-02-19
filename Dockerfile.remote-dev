@@ -13,6 +13,7 @@ RUN apt-get update -y -q \
     && rm cmake-${CMAKE_VERSION}-linux-x86_64.sh \
     && python -m pip install --upgrade pip \
     && pip install conan \
+    && conan profile detect \
     && apt-get clean -y -q \
     && rm -rf /var/lib/apt/lists/*
 
@@ -25,9 +26,9 @@ RUN ( \
     echo 'LogLevel DEBUG2'; \
     echo 'PasswordAuthentication yes'; \
     echo 'Subsystem sftp /usr/lib/openssh/sftp-server'; \
-  ) > /etc/ssh/sshd_config_endstone \
+  ) > /etc/ssh/sshd_config_dev \
   && mkdir /run/sshd
 
 EXPOSE 22
 
-CMD ["/usr/sbin/sshd", "-D", "-e", "-f", "/etc/ssh/sshd_config_endstone"]
+CMD ["/usr/sbin/sshd", "-D", "-e", "-f", "/etc/ssh/sshd_config_dev"]
