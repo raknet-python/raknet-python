@@ -6,11 +6,7 @@ from raknet import RakPeer, MessageIdentifiers, PacketPriority, PacketReliabilit
 ID_GAME_MESSAGE_1 = MessageIdentifiers.ID_USER_PACKET_ENUM + 1
 
 
-def run_server():
-    server = RakPeer()
-    server.max_incoming_connections = 10
-    server.startup(port=60000, max_connections=10)
-
+def run_server(server: RakPeer):
     timeout = time.time() + 5
     while time.time() < timeout:
         packet = server.receive()
@@ -30,11 +26,7 @@ def run_server():
     assert False, "Game message was not received"
 
 
-def run_client():
-    client = RakPeer()
-    client.startup()
-    client.connect("127.0.0.1", 60000)
-
+def run_client(client: RakPeer):
     timeout = time.time() + 5
     while time.time() < timeout:
         packet = client.receive()
@@ -64,7 +56,16 @@ def run_client():
 
 
 def test_echo():
-    with concurrent.futures.ProcessPoolExecutor(max_workers=2) as executor:
-        futures = [executor.submit(run_server), executor.submit(run_client)]
+    server = RakPeer()
+    server.max_incoming_connections = 10
+    server.startup()
+    server_host, server_port = server.get_bound_address()
+
+    client = RakPeer()
+    client.startup()
+    client.connect(server_host, server_port)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+        futures = [executor.submit(run_server, server), executor.submit(run_client, client)]
         for future in futures:
             future.result()

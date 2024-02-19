@@ -5,14 +5,15 @@ from raknet import RakPeer, MessageIdentifiers
 ID_GAME_MESSAGE_1 = MessageIdentifiers.ID_USER_PACKET_ENUM + 1
 
 
-def do_test(server_ver: int, client_ver: int):
+def run(server_ver: int, client_ver: int):
     server = RakPeer()
     server.max_incoming_connections = 10
-    server.startup(port=60000 + server_ver, max_connections=10, protocol_version=server_ver)
+    server.startup(max_connections=10, protocol_version=server_ver)
+    server_host, server_port = server.get_bound_address()
 
     client = RakPeer()
     client.startup(protocol_version=client_ver)
-    client.connect("127.0.0.1", 60000 + server_ver)
+    client.connect(server_host, server_port)
 
     timeout = time.time() + 5
     while time.time() < timeout:
@@ -31,16 +32,16 @@ def do_test(server_ver: int, client_ver: int):
 
 
 def test_compatible_1():
-    do_test(6, 6)
+    run(6, 6)
 
 
 def test_compatible_2():
-    do_test(11, 11)
+    run(11, 11)
 
 
 def test_incompatible_1():
-    do_test(7, 8)
+    run(7, 8)
 
 
 def test_incompatible_2():
-    do_test(10, 9)
+    run(10, 9)

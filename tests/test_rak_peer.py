@@ -5,7 +5,7 @@ from raknet import RakPeer, StartupError
 
 def test_server_startup():
     server = RakPeer()
-    server.startup(port=60000, max_connections=10)
+    server.startup(max_connections=10)
 
 
 def test_client_startup():
@@ -15,10 +15,11 @@ def test_client_startup():
 
 def test_duplicate_port():
     alice = RakPeer()
-    alice.startup(port=2000)
+    alice.startup()
+    _, port = alice.get_bound_address()
     with pytest.raises(StartupError):
         bob = RakPeer()
-        bob.startup(port=2000)
+        bob.startup(port=port)
 
 
 def test_negative_max_connections():
