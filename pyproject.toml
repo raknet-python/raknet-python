@@ -13,25 +13,28 @@ requires-python = ">=3.9"
 keywords = ["python", "raknet", "network"]
 license = { file = "LICENSE" }
 classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: BSD License",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: C++",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: BSD License",
-    "Operating System :: MacOS",
-    "Operating System :: Microsoft :: Windows",
-    "Operating System :: POSIX :: Linux",
+    "Topic :: System :: Networking",
 ]
 dependencies = []
 dynamic = ["version"]
 
 [project.urls]
 #Changelog = "https://raknet.readthedocs.io/en/latest/changelog.html"
-Documentation = "https://raknet.readthedocs.io"
-Homepage = "https://github.com/wu-vincent/raknet-python"
-Issues = "https://github.com/wu-vincent/raknet-python/issues"
+Documentation = "https://raknet-python.readthedocs.io"
+Homepage = "https://github.com/raknet-python/raknet-python"
+Issues = "https://github.com/raknet-python/raknet-python/issues"
 
 [tool.scikit-build]
 cmake.args = ["-G Ninja", "--preset conan-release"]
