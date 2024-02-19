@@ -5,6 +5,7 @@
 [![PyPI - Version](https://img.shields.io/pypi/v/raknet?logo=python&logoColor=white)](https://pypi.org/project/raknet/)
 ![GitHub License](https://img.shields.io/github/license/raknet-python/raknet-python)
 ![Python](https://img.shields.io/badge/Python-3-blue)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Python bindings for the [RakNet](https://github.com/facebookarchive/RakNet) networking library
 
