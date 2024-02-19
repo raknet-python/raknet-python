@@ -246,6 +246,14 @@ PYBIND11_MODULE(raknet_python, m) {
             py::arg("ordering_channel") = 0,
             py::arg("disconnection_notification_priority") = PacketPriority::LOW_PRIORITY)
 
+        .def(
+            "get_bound_address",
+            [](RakNet::RakPeerInterface &self, const int index) {
+                auto address = self.GetMyBoundAddress(index);
+                return py::make_tuple(address.ToString(false), address.GetPort());
+            },
+            py::arg("index") = 0)
+
         .def_property_readonly("active", &RakNet::RakPeerInterface::IsActive)
         .def_property_readonly("num_connections", &RakNet::RakPeerInterface::NumberOfConnections)
         .def_property("max_incoming_connections",
