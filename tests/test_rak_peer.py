@@ -16,7 +16,8 @@ def test_client_startup():
 def test_duplicate_port():
     alice = RakPeer()
     alice.startup()
-    _, port = alice.get_bound_address()
+    port = alice.get_bound_address().port
+
     with pytest.raises(StartupError):
         bob = RakPeer()
         bob.startup(port=port)

@@ -1,5 +1,6 @@
 __all__ = [
     "RakPeer",
+    "SystemAddress",
     "Packet",
     "PacketPriority",
     "PacketReliability",
@@ -16,6 +17,7 @@ for name in __all__:
     del module
 
 RakPeer = globals()["_RakPeer"]
+SystemAddress = globals()["_SystemAddress"]
 Packet = globals()["_Packet"]
 PacketPriority = globals()["_PacketPriority"]
 PacketReliability = globals()["_PacketReliability"]

@@ -94,9 +94,11 @@ PYBIND11_MODULE(raknet_python, m) {
 
     py::class_<Packet>(m, "Packet")
         .def_readonly("data", &Packet::data)
-        .def_property_readonly("system_address", [](const Packet &self) {
-            return py::make_tuple(self.system_address.ToString(false), self.system_address.GetPort());
-        });
+        .def_readonly("system_address", &Packet::system_address);
+
+    py::class_<RakNet::SystemAddress>(m, "SystemAddress")
+        .def_property_readonly("host", [](RakNet::SystemAddress &self) { return self.ToString(false); })
+        .def_property_readonly("port", &RakNet::SystemAddress::GetPort);
 
     py::class_<RakNet::RakPeerInterface, std::unique_ptr<RakNet::RakPeerInterface, RakPeerDeleter>>(m, "RakPeer")
         .def(py::init([]() {
@@ -205,8 +207,7 @@ PYBIND11_MODULE(raknet_python, m) {
                PacketPriority priority,
                PacketReliability reliability,
                unsigned int ordering_channel,
-               const std::string &host,
-               int port,
+               RakNet::SystemAddress address,
                uint32_t force_receipt_num) {
                 char *buffer = nullptr;
                 py::ssize_t length = 0;
@@ -218,7 +219,7 @@ PYBIND11_MODULE(raknet_python, m) {
                                  priority,
                                  reliability,
                                  static_cast<char>(ordering_channel & 0xff),
-                                 RakNet::SystemAddress(host.c_str(), port),
+                                 address,
                                  false,
                                  force_receipt_num);
             },
@@ -226,8 +227,7 @@ PYBIND11_MODULE(raknet_python, m) {
             py::arg("priority"),
             py::arg("reliability"),
             py::arg("ordering_channel"),
-            py::arg("host"),
-            py::arg("port"),
+            py::arg("address"),
             py::arg("force_receipt_num") = 0)
 
         .def(
@@ -246,13 +246,7 @@ PYBIND11_MODULE(raknet_python, m) {
             py::arg("ordering_channel") = 0,
             py::arg("disconnection_notification_priority") = PacketPriority::LOW_PRIORITY)
 
-        .def(
-            "get_bound_address",
-            [](RakNet::RakPeerInterface &self, const int index) {
-                auto address = self.GetMyBoundAddress(index);
-                return py::make_tuple(address.ToString(false), address.GetPort());
-            },
-            py::arg("index") = 0)
+        .def("get_bound_address", &RakNet::RakPeerInterface::GetMyBoundAddress, py::arg("index") = 0)
 
         .def_property_readonly("active", &RakNet::RakPeerInterface::IsActive)
         .def_property_readonly("num_connections", &RakNet::RakPeerInterface::NumberOfConnections)

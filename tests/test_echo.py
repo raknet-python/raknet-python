@@ -40,14 +40,12 @@ def run_client(client: RakPeer):
             print("Connection lost.")
         if packet.data[0] == MessageIdentifiers.ID_CONNECTION_REQUEST_ACCEPTED:
             print("Our connection request has been accepted.")
-            host, port = packet.system_address
             client.send(
                 bytes([ID_GAME_MESSAGE_1]) + b"Hello, World",
                 PacketPriority.HIGH_PRIORITY,
                 PacketReliability.RELIABLE_ORDERED,
                 0,
-                host,
-                port,
+                packet.system_address
             )
             client.shutdown(1)
             return
@@ -59,11 +57,11 @@ def test_echo():
     server = RakPeer()
     server.max_incoming_connections = 10
     server.startup()
-    server_host, server_port = server.get_bound_address()
+    server_addr = server.get_bound_address()
 
     client = RakPeer()
     client.startup()
-    client.connect(server_host, server_port)
+    client.connect(server_addr.host, server_addr.port)
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
         futures = [executor.submit(run_server, server), executor.submit(run_client, client)]

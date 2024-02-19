@@ -9,11 +9,11 @@ def run(server_ver: int, client_ver: int):
     server = RakPeer()
     server.max_incoming_connections = 10
     server.startup(max_connections=10, protocol_version=server_ver)
-    server_host, server_port = server.get_bound_address()
+    server_addr = server.get_bound_address()
 
     client = RakPeer()
     client.startup(protocol_version=client_ver)
-    client.connect(server_host, server_port)
+    client.connect(server_addr.host, server_addr.port)
 
     timeout = time.time() + 5
     while time.time() < timeout:
@@ -40,8 +40,8 @@ def test_compatible_2():
 
 
 def test_incompatible_1():
-    run(7, 8)
+    run(6, 11)
 
 
 def test_incompatible_2():
-    run(10, 9)
+    run(11, 6)
