@@ -83,6 +83,7 @@ class PacketReliability:
 
 class RakPeer:
     max_incoming_connections: int
+    offline_ping_response: bytes
     def __init__(self) -> None:
         ...
     def connect(self, host: str, port: int, num_attempts: int = 6, attempt_interval_ms: int = 1000, timeout: int = 0) -> None:

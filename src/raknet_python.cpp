@@ -261,7 +261,23 @@ PYBIND11_MODULE(_raknet, m) {
         .def_property_readonly("num_connections", &RakNet::RakPeerInterface::NumberOfConnections)
         .def_property("max_incoming_connections",
                       &RakNet::RakPeerInterface::GetMaximumIncomingConnections,
-                      &RakNet::RakPeerInterface::SetMaximumIncomingConnections);
+                      &RakNet::RakPeerInterface::SetMaximumIncomingConnections)
+        .def_property(
+            "offline_ping_response",
+            [](RakNet::RakPeerInterface &self) {
+                char *data;
+                unsigned int length;
+                self.GetOfflinePingResponse(&data, &length);
+                return py::bytes(data, length);
+            },
+            [](RakNet::RakPeerInterface &self, py::bytes data) {
+                char *buffer = nullptr;
+                py::ssize_t length = 0;
+                if (PYBIND11_BYTES_AS_STRING_AND_SIZE(data.ptr(), &buffer, &length) != 0) {
+                    throw py::error_already_set();
+                }
+                self.SetOfflinePingResponse(buffer, length);
+            });
 }
 } // namespace python
 } // namespace raknet
