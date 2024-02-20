@@ -59,6 +59,9 @@ class Packet:
     def data(self) -> bytes:
         ...
     @property
+    def guid(self) -> int:
+        ...
+    @property
     def system_address(self) -> SystemAddress:
         ...
 

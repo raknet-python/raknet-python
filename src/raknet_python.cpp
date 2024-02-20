@@ -21,11 +21,13 @@ struct ConnectionAttemptError : public std::runtime_error {
 };
 
 struct Packet {
-    Packet(py::bytes payload, const RakNet::SystemAddress &address)
-        : data(std::move(payload)), system_address(address) {}
+    explicit Packet(const RakNet::Packet &packet)
+        : data(std::move(py::bytes(reinterpret_cast<const char *>(packet.data), packet.length))),
+          system_address(packet.systemAddress), guid(packet.guid.g) {}
 
     py::bytes data;
     RakNet::SystemAddress system_address;
+    uint64_t guid;
 };
 
 struct RakPeerDeleter {
@@ -94,7 +96,8 @@ PYBIND11_MODULE(_raknet, m) {
 
     py::class_<Packet>(m, "Packet")
         .def_readonly("data", &Packet::data)
-        .def_readonly("system_address", &Packet::system_address);
+        .def_readonly("system_address", &Packet::system_address)
+        .def_readonly("guid", &Packet::guid);
 
     py::class_<RakNet::SystemAddress>(m, "SystemAddress")
         .def_property_readonly("host", [](RakNet::SystemAddress &self) { return self.ToString(false); })
@@ -194,8 +197,7 @@ PYBIND11_MODULE(_raknet, m) {
                  if (!p) {
                      return nullptr;
                  }
-                 auto packet = std::make_unique<Packet>(py::bytes(reinterpret_cast<const char *>(p->data), p->length),
-                                                        p->systemAddress);
+                 auto packet = std::make_unique<Packet>(*p);
                  self.DeallocatePacket(p);
                  return packet;
              })
