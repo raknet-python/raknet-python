@@ -107,6 +107,9 @@ class RakPeer:
     def active(self) -> bool:
         ...
     @property
+    def guid(self) -> int:
+        ...
+    @property
     def num_connections(self) -> int:
         ...
 

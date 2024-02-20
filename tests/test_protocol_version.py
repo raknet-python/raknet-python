@@ -20,7 +20,7 @@ def run(server_ver: int, client_ver: int):
         packet = client.receive()
         if packet is None:
             continue
-
+        assert packet.guid == server.guid
         if packet.data[0] == MessageIdentifiers.ID_CONNECTION_REQUEST_ACCEPTED:
             assert server_ver == client_ver
             return

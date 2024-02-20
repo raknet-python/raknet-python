@@ -260,6 +260,7 @@ PYBIND11_MODULE(_raknet, m) {
         .def("get_bound_address", &RakNet::RakPeerInterface::GetMyBoundAddress, py::arg("index") = 0)
 
         .def_property_readonly("active", &RakNet::RakPeerInterface::IsActive)
+        .def_property_readonly("guid", [](RakNet::RakPeerInterface &self) { return self.GetMyGUID().g; })
         .def_property_readonly("num_connections", &RakNet::RakPeerInterface::NumberOfConnections)
         .def_property("max_incoming_connections",
                       &RakNet::RakPeerInterface::GetMaximumIncomingConnections,

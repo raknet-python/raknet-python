@@ -23,6 +23,7 @@ def test_unconnected_ping():
         if packet is None:
             continue
         if packet.data[0] == MessageIdentifiers.ID_UNCONNECTED_PONG:
+            assert packet.guid == server.guid
             ping_time = unpack(">I", packet.data[1:5])[0]
             response = packet.data[5:]
             assert response == server.offline_ping_response
