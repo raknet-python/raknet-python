@@ -94,14 +94,14 @@ PYBIND11_MODULE(_raknet, m) {
         .value("RELIABLE_ORDERED_WITH_ACK_RECEIPT", PacketReliability::RELIABLE_ORDERED_WITH_ACK_RECEIPT)
         .export_values();
 
+    py::class_<RakNet::SystemAddress>(m, "SystemAddress")
+        .def_property_readonly("host", [](RakNet::SystemAddress &self) { return self.ToString(false); })
+        .def_property_readonly("port", &RakNet::SystemAddress::GetPort);
+
     py::class_<Packet>(m, "Packet")
         .def_readonly("data", &Packet::data)
         .def_readonly("system_address", &Packet::system_address)
         .def_readonly("guid", &Packet::guid);
-
-    py::class_<RakNet::SystemAddress>(m, "SystemAddress")
-        .def_property_readonly("host", [](RakNet::SystemAddress &self) { return self.ToString(false); })
-        .def_property_readonly("port", &RakNet::SystemAddress::GetPort);
 
     py::class_<RakNet::RakPeerInterface, std::unique_ptr<RakNet::RakPeerInterface, RakPeerDeleter>>(m, "RakPeer")
         .def(py::init([]() {
