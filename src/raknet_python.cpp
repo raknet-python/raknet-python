@@ -96,7 +96,8 @@ PYBIND11_MODULE(_raknet, m) {
 
     py::class_<RakNet::SystemAddress>(m, "SystemAddress")
         .def_property_readonly("host", [](RakNet::SystemAddress &self) { return self.ToString(false); })
-        .def_property_readonly("port", &RakNet::SystemAddress::GetPort);
+        .def_property_readonly("port", &RakNet::SystemAddress::GetPort)
+        .def("__str__", [](RakNet::SystemAddress &self) { return self.ToString(true, ':'); });
 
     py::class_<Packet>(m, "Packet")
         .def_readonly("data", &Packet::data)
