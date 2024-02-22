@@ -194,6 +194,23 @@ PYBIND11_MODULE(_raknet, m) {
             py::arg("attempt_interval_ms") = 1000,
             py::arg("timeout") = 0)
 
+        .def(
+            "close_connection",
+            [](RakNet::RakPeerInterface &self,
+               RakNet::SystemAddress &target,
+               bool send_disconnection_notification,
+               int ordering_channel,
+               PacketPriority disconnection_notification_priority) {
+                self.CloseConnection(target,
+                                     send_disconnection_notification,
+                                     static_cast<unsigned char>(ordering_channel & 0xff),
+                                     disconnection_notification_priority);
+            },
+            py::arg("target"),
+            py::arg("send_disconnection_notification"),
+            py::arg("ordering_channel") = 0,
+            py::arg("disconnection_notification_priority") = PacketPriority::LOW_PRIORITY)
+
         .def("receive",
              [](RakNet::RakPeerInterface &self) -> std::unique_ptr<Packet> {
                  auto *p = self.Receive();
