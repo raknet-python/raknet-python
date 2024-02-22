@@ -1,8 +1,10 @@
 #include <pybind11/pybind11.h>
 
+#include <exception>
+#include <memory>
 #include <string>
-#include <utility>
 
+#include <raknet/GetTime.h>
 #include <raknet/MessageIdentifiers.h>
 #include <raknet/RakNetTypes.h>
 #include <raknet/RakPeerInterface.h>
@@ -282,6 +284,9 @@ PYBIND11_MODULE(_raknet, m) {
                 }
                 self.SetOfflinePingResponse(buffer, length);
             });
+
+    m.def("time", []() -> double { return RakNet::GetTimeMS() / 1000.0; });
+    m.def("time_ms", &RakNet::GetTimeMS);
 }
 } // namespace python
 } // namespace raknet

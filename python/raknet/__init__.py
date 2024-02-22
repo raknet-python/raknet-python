@@ -7,6 +7,8 @@ from raknet._raknet import (
     MessageIdentifiers,
     ConnectionAttemptError,
     StartupError,
+    time,
+    time_ms,
 )
 
 __all__ = [
@@ -18,4 +20,6 @@ __all__ = [
     "MessageIdentifiers",
     "ConnectionAttemptError",
     "StartupError",
+    "time"
+    "time_ms"
 ]
